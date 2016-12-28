@@ -6,7 +6,7 @@ openerp.oepetstore = function(instance, local) {
       start: function() {
           var self = this;
           var model = new instance.web.Model("oepetstore.message_of_the_day");
-          model.call("my_method", {context: new instance.web.CompoundContext()}).then(function(result) {
+          model.call("my_method", {context: new instance.web.CompoundContext({'new_key': 'key_value'})}).then(function(result) {
               self.$el.append("<div>Hello " + result["hello"] + "</div>");
               // will show "Hello world" to the user
           });
