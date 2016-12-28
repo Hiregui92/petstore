@@ -3,53 +3,37 @@ openerp.oepetstore = function(instance, local) {
         _lt = instance.web._lt;
     var QWeb = instance.web.qweb;
 
-    local.HomePage = instance.Widget.extend({
-//        start: function() {
-//            var products = new local.ProductsWidget(
-//                this, ["cpu", "mouse", "keyboard", "graphic card", "screen"], "#00FF00");
-//            products.appendTo(this.$el);
-//        },
-
-        start: function() {
-            var widget = new local.ConfirmWidget(this);
-            widget.on("user_chose", this, this.user_chose);
-            widget.appendTo(this.$el);
-         },
-         user_chose: function(confirm) {
-            if (confirm) {
-               console.log("The user agreed to continue");
-            } else {
-               console.log("The user refused to continue");
-            }
-         },
-    });
-
-    local.ProductsWidget = instance.Widget.extend({
-        template: "ProductsWidget",
-        init: function(parent, products, color) {
-            this._super(parent);
-            console.log(products);
-            this.products = products;
-            this.color = color;
-        },
-    });
-
-    local.ConfirmWidget = instance.Widget.extend({
+    local.ColorInputWidget = instance.Widget.extend({
+        template: "ColorInputWidget",
         events: {
-            'click button.ok_button': function () {
-                this.trigger('user_chose', true);
-            },
-            'click button.cancel_button': function () {
-                this.trigger('user_chose', false);
-            }
+            'change input': 'input_changed'
         },
         start: function() {
-            this.$el.append("<div>Are you sure you want to perform this action?</div>" +
-                "<button class='ok_button'>Ok</button>" +
-                "<button class='cancel_button'>Cancel</button>");
+            this.input_changed();
+            return this._super();
+        },
+        input_changed: function() {
+            var color = [
+                "#",
+                this.$(".oe_color_red").val(),
+                this.$(".oe_color_green").val(),
+                this.$(".oe_color_blue").val()
+            ].join('');
+            this.set("color", color);
         },
     });
 
-    instance.web.client_actions.add(
-        'petstore.homepage', 'instance.oepetstore.HomePage');
+    local.HomePage = instance.Widget.extend({
+        template: "HomePage",
+        start: function() {
+            this.colorInput = new local.ColorInputWidget(this);
+            this.colorInput.on("change:color", this, this.color_changed);
+            return this.colorInput.appendTo(this.$el);
+        },
+        color_changed: function(time) {
+            this.$(".oe_color_div").css("background-color", this.colorInput.get("color"));
+        },
+    });
+
+    instance.web.client_actions.add('petstore.homepage', 'instance.oepetstore.HomePage');
 }
